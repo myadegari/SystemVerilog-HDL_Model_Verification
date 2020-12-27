@@ -173,8 +173,10 @@ class TestGenerator;
 
           assert(RandP1.randomize());
           DrivePort1.Add(RandP1.Inputs[0],RandP1.Inputs[1], 0); // make Add result exactly 'hFFFFFFFF
-          assert(RandP1.randomize());
-          DrivePort1.Add(RandP1.Inputs2[0],RandP1.Inputs2[1], 1); // Make Add overflow by 1
+          //assert(RandP1.randomize());
+          //DrivePort1.Add(RandP1.Inputs2[0],RandP1.Inputs2[1], 1); // Make Add overflow by 1
+          // make change
+          DrivePort1.Add('hFFFFFFFF,'h00000011, 1); // Make Add overflow by 1
           //-------------------------------------------------------------------------------------------//
           
           repeat(10)@(posedge GlobalPort.clk);

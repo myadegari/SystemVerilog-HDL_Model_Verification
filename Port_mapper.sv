@@ -2,6 +2,7 @@
 `include "Generator.sv"
 `include "DUT/calc2_top.v"
 `include "Sniffer.v"
+`include "Golden_model.sv"
 
 
 
@@ -37,6 +38,15 @@ module Simulate_this_for_Run_tests;
   wire [31:0] out_data1,out_data2,out_data3,out_data4;
   wire [1:0] out_resp1,out_resp2,out_resp3,out_resp4,out_tag1,out_tag2,out_tag3,out_tag4;
   wire [37:0] p1,p2,p3,p4;
+  wire [31:0] rp1,rp2,rp3,rp4;
+
+  /*-------------------------
+  --------------------*/
+  wire [31:0] h_data1,h_data2;
+  wire [3:0] h_cmd;
+  wire [1:0] h_tag;
+  wire [69:0] temp;
+  wire [1:0] out_resp;
   /*
   ----------------------------------------------------------------
   Define and linked the variables constructed above to the characteristics defined in sv_Interfaces.sv
@@ -103,6 +113,14 @@ module Simulate_this_for_Run_tests;
                      req4_data_in,req1_cmd_in,req2_cmd_in,req3_cmd_in,
                      req4_cmd_in,req1_tag_in,req2_tag_in,req3_tag_in,
                      req4_tag_in,p1,p2,p3,p4);
+
+  //*******************
+  holder H(temp,p1,clk,reset);
+  Golden_Model gold1 (clk,reset,temp,rp1,out_resp);
+  // Golden_Model gold2 (clk,reset,p2,rp2);
+  // Golden_Model gold3 (clk,reset,p3,rp3);
+  // Golden_Model gold4 (clk,reset,p4,rp4);
+  //****************
 
   /*
   -----------------------------------------------------------------

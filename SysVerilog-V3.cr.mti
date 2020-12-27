@@ -1,4 +1,20 @@
-D:/Uni/CodeV2/Generator.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/CodeV2/Generator.sv
+D:/Uni/SystemVerilog_git/SystemVerilog-Project/Make_Random.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/Make_Random.sv
+Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
+-- Compiling interface Port_Stimuli
+-- Compiling interface Port_Global
+-- Compiling package Make_Random_sv_unit
+
+Top level modules:
+	--none--
+
+} {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/Sniffer.v {1 {vlog -work work -vopt -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/Sniffer.v
+Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
+-- Compiling module Sniffer
+
+Top level modules:
+	Sniffer
+
+} {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/Generator.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/Generator.sv
 Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
 -- Compiling interface Port_Stimuli
 -- Compiling interface Port_Global
@@ -7,15 +23,14 @@ Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
 Top level modules:
 	--none--
 
-} {} {}} D:/Uni/CodeV2/sv_Interfaces.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/CodeV2/sv_Interfaces.sv
+} {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/holder.v {1 {vlog -work work -vopt -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/holder.v
 Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
--- Compiling interface Port_Stimuli
--- Compiling interface Port_Global
+-- Compiling module holder
 
 Top level modules:
-	--none--
+	holder
 
-} {} {}} D:/Uni/CodeV2/Driver.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/CodeV2/Driver.sv
+} {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/Driver.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/Driver.sv
 Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
 -- Compiling interface Port_Stimuli
 -- Compiling interface Port_Global
@@ -24,7 +39,15 @@ Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
 Top level modules:
 	--none--
 
-} {} {}} D:/Uni/CodeV2/Port_mapper.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/CodeV2/Port_mapper.sv
+} {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/sv_Interfaces.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/sv_Interfaces.sv
+Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
+-- Compiling interface Port_Stimuli
+-- Compiling interface Port_Global
+
+Top level modules:
+	--none--
+
+} {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/Port_mapper.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/Port_mapper.sv
 Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
 -- Compiling interface Port_Stimuli
 -- Compiling interface Port_Global
@@ -38,26 +61,11 @@ Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
 -- Compiling module shifter
 -- Compiling module calc2_top
 -- Compiling module Sniffer
+-- Compiling module Golden_Model
 -- Compiling program Top_test
 -- Compiling module Simulate_this_for_Run_tests
 
 Top level modules:
 	Simulate_this_for_Run_tests
-
-} {} {}} D:/Uni/CodeV2/Sniffer.v {1 {vlog -work work -vopt -stats=none D:/Uni/CodeV2/Sniffer.v
-Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
--- Compiling module Sniffer
-
-Top level modules:
-	Sniffer
-
-} {} {}} D:/Uni/CodeV2/Make_Random.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/CodeV2/Make_Random.sv
-Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
--- Compiling interface Port_Stimuli
--- Compiling interface Port_Global
--- Compiling package Make_Random_sv_unit
-
-Top level modules:
-	--none--
 
 } {} {}}
