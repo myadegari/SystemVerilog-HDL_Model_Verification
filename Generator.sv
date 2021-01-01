@@ -103,16 +103,16 @@ class TestGenerator;
   task Random_Test_Selector();
 
       $write("%dns: Start Random Test Selector\n",$time);
-      // repeat(10)begin
+      repeat(10)begin
 
       IReset();
       @(posedge GlobalPort.clk);
       GlobalPort.reset     = 0;
 
-      //assert(RandGlobal.randomize());
-      case(1)//(RandGlobal.test_selector)
+      assert(RandGlobal.randomize());
+      case(RandGlobal.test_selector)
 
-        1: testP1();//(RandGlobal.Case_selector);
+        1: testP1(RandGlobal.Case_selector);
         2: testP2(RandGlobal.Case_selector);
         3: testP3(RandGlobal.Case_selector);
         4: testP4(RandGlobal.Case_selector);
@@ -122,7 +122,7 @@ class TestGenerator;
 
       endcase
 
-    // end
+    end
     $write("%dns: End Random Test Selector\n",$time);
     repeat(10)@(posedge GlobalPort.clk);
     ->Finish;
@@ -173,10 +173,8 @@ class TestGenerator;
 
           assert(RandP1.randomize());
           DrivePort1.Add(RandP1.Inputs[0],RandP1.Inputs[1], 0); // make Add result exactly 'hFFFFFFFF
-          //assert(RandP1.randomize());
-          //DrivePort1.Add(RandP1.Inputs2[0],RandP1.Inputs2[1], 1); // Make Add overflow by 1
-          // make change
-          DrivePort1.Add('hFFFFFFFF,'h00000011, 1); // Make Add overflow by 1
+          assert(RandP1.randomize());
+          DrivePort1.Add(RandP1.Inputs2[0],RandP1.Inputs2[1], 1); // Make Add overflow by 1
           //-------------------------------------------------------------------------------------------//
           
           repeat(10)@(posedge GlobalPort.clk);

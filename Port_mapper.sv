@@ -1,8 +1,8 @@
 `include "sv_Interfaces.sv"
 `include "Generator.sv"
 `include "DUT/calc2_top.v"
-`include "Sniffer.v"
 `include "Golden_model.sv"
+`include "Command_holder_and_time_logger.SV"
 
 
 
@@ -37,21 +37,21 @@ module Simulate_this_for_Run_tests;
   wire 	 scan_out;
   wire [31:0] out_data1,out_data2,out_data3,out_data4;
   wire [1:0] out_resp1,out_resp2,out_resp3,out_resp4,out_tag1,out_tag2,out_tag3,out_tag4;
-  wire [37:0] p1,p2,p3,p4;
-  wire [31:0] rp1,rp2,rp3,rp4;
+  wire [48:0] Golden_exp_result_1,Golden_exp_result_2,Golden_exp_result_3,Golden_exp_result_4;
 
   /*-------------------------
+
   --------------------*/
-  wire [31:0] h_data1,h_data2;
-  wire [3:0] h_cmd;
-  wire [1:0] h_tag;
-  wire [69:0] temp;
-  wire [1:0] out_resp;
+
+  wire [69:0] Command_paket1,Command_paket2,Command_paket3,Command_paket4;
+  // wire [1:0] Golden_exp_resp1,Golden_exp_resp2,Golden_exp_resp3,Golden_exp_resp4;
+  // wire s_flow1,s_flow2,s_flow3,s_flow4;
   /*
   ----------------------------------------------------------------
   Define and linked the variables constructed above to the characteristics defined in sv_Interfaces.sv
   ----------------------------------------------------------------
   */
+
   Port_Global GlobalPort(clk,reset);
   Port_Stimuli SPort1(req1_cmd_in,req1_tag_in,req1_data_in);
   Port_Stimuli SPort2(req2_cmd_in,req2_tag_in,req2_data_in);
@@ -63,6 +63,7 @@ module Simulate_this_for_Run_tests;
   connected Top_Test Program to instant of interfaces that makes above
   ------------------------------------------------------------------
   */
+  
   Top_test Main(
              .GlobalPort(GlobalPort),
              .SPort1(SPort1),
@@ -70,7 +71,6 @@ module Simulate_this_for_Run_tests;
              .SPort3(SPort3),
              .SPort4(SPort4)
            );
-
   /*
   -------------------------------------------------------------------------
   connected DUT module to Generator wires and Global.Clock and Global.reset and prepared to Drive Test Cases
@@ -109,18 +109,21 @@ module Simulate_this_for_Run_tests;
               .scan_out(scan_out)
             );
 
-  Sniffer paket_maker(clk,req1_data_in,req2_data_in,req3_data_in,
-                     req4_data_in,req1_cmd_in,req2_cmd_in,req3_cmd_in,
-                     req4_cmd_in,req1_tag_in,req2_tag_in,req3_tag_in,
-                     req4_tag_in,p1,p2,p3,p4);
 
   //*******************
-  holder H(temp,p1,clk,reset);
-  Golden_Model gold1 (clk,reset,temp,rp1,out_resp);
-  // Golden_Model gold2 (clk,reset,p2,rp2);
-  // Golden_Model gold3 (clk,reset,p3,rp3);
-  // Golden_Model gold4 (clk,reset,p4,rp4);
+  
+
+  CHTL H1("1",Command_paket1,req1_cmd_in,req1_data_in,req1_tag_in,clk,reset);
+  Golden_Model gold1 ("1",clk,reset,Command_paket1,Golden_exp_result_1);
+  CHTL H2("2",Command_paket2,req2_cmd_in,req2_data_in,req2_tag_in,clk,reset);
+  Golden_Model gold2 ("2",clk,reset,Command_paket2,Golden_exp_result_2);
+  CHTL H3("3",Command_paket3,req3_cmd_in,req3_data_in,req3_tag_in,clk,reset);
+  Golden_Model gold3 ("3",clk,reset,Command_paket3,Golden_exp_result_3);
+  CHTL H4("4",Command_paket4,req4_cmd_in,req4_data_in,req4_tag_in,clk,reset);
+  Golden_Model gold4 ("4",clk,reset,Command_paket4,Golden_exp_result_4);
+  
   //****************
+  
 
   /*
   -----------------------------------------------------------------

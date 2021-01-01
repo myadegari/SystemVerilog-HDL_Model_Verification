@@ -7,13 +7,6 @@ Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
 Top level modules:
 	--none--
 
-} {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/Sniffer.v {1 {vlog -work work -vopt -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/Sniffer.v
-Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
--- Compiling module Sniffer
-
-Top level modules:
-	Sniffer
-
 } {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/Generator.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/Generator.sv
 Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
 -- Compiling interface Port_Stimuli
@@ -23,12 +16,20 @@ Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
 Top level modules:
 	--none--
 
-} {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/holder.v {1 {vlog -work work -vopt -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/holder.v
+} {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/Command_Holder_and_time_logger.SV {1 {vlog -work work -vopt -sv -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/Command_Holder_and_time_logger.SV
 Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
--- Compiling module holder
+-- Compiling module CHTL
 
 Top level modules:
-	holder
+	CHTL
+
+} {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/sv_Interfaces.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/sv_Interfaces.sv
+Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
+-- Compiling interface Port_Stimuli
+-- Compiling interface Port_Global
+
+Top level modules:
+	--none--
 
 } {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/Driver.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/Driver.sv
 Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
@@ -39,13 +40,12 @@ Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
 Top level modules:
 	--none--
 
-} {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/sv_Interfaces.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/sv_Interfaces.sv
+} {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/Golden_Model.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/Golden_Model.sv
 Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
--- Compiling interface Port_Stimuli
--- Compiling interface Port_Global
+-- Compiling module Golden_Model
 
 Top level modules:
-	--none--
+	Golden_Model
 
 } {} {}} D:/Uni/SystemVerilog_git/SystemVerilog-Project/Port_mapper.sv {1 {vlog -work work -vopt -sv -stats=none D:/Uni/SystemVerilog_git/SystemVerilog-Project/Port_mapper.sv
 Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
@@ -60,8 +60,8 @@ Model Technology ModelSim SE-64 vlog 2019.4 Compiler 2019.10 Oct 15 2019
 -- Compiling module priority2
 -- Compiling module shifter
 -- Compiling module calc2_top
--- Compiling module Sniffer
 -- Compiling module Golden_Model
+-- Compiling module CHTL
 -- Compiling program Top_test
 -- Compiling module Simulate_this_for_Run_tests
 
