@@ -1,167 +1,169 @@
-module Golden_Model(port,clk,reset,paket_in,result_paket_out);
+module Golden_Model(PORT_NUMBER,packet_imported,output_packet_result);
 
-  input clk,reset;
-  input reg [7:0] port;
-  input [69:0] paket_in;
+  input reg [7:0] PORT_NUMBER;
+  input [69:0] packet_imported;
 
-  output reg [48:0] result_paket_out;
-  reg [31:0] result_paket_out_temp;
-
-  reg [31:0] out_result;
-  reg [1:0]  exp_resp;
-  reg [1:0]  exp_tag;
-  int file_id;
-  reg s_flow ;
+  output reg [36:0] output_packet_result;
+  
+  reg [31:0]  temporary_result;
+  reg [1 :0]  expected_response;
+  reg [1 :0]  expected_tag;
+  reg         recognition_bit ;
+  int FILE_ID;
+ 
   
 
 
-  function int make_result(input [31:0] data1,data2,input[3:0] h_cmd,output int resp,output flow);
+  function int make_result(input [31:0] data_a,data_b,input[3:0] received_commands,output int respond,output recognition_bit);
+    
+    bit [31:0] shift_overflow_check;
 
-
-    case (h_cmd)
+    case (received_commands)
 
       1 : // Add
       begin
-        assign {flow,make_result} = data1 + data2; // To calculate the sum and overflow
-        if (flow === 1'b1)
+        assign {recognition_bit,make_result} = data_a + data_b; // To calculate the sum and overflow
+        if (recognition_bit!=0)
         begin
-          assign resp = 2;
+          assign respond     = 2;
           assign make_result = 32'b0;
         end
-        else assign resp =1;
+        else assign respond  =1;
       end
 
       2 : // Subtract
       begin
-        if(data1 < data2) // check for Underflow
+        if(data_a < data_b) // check for Underflow
         begin
-          assign make_result =32'b0;
-          assign flow = 1;
-          assign resp = 2;
+          assign make_result     = 32'b0;
+          assign recognition_bit = 1;
+          assign respond         = 2;
         end
         else
         begin
-          assign make_result = data1 - data2;
-          assign flow = 0;
-          assign resp =1;
+          assign make_result     = data_a - data_b;
+          assign recognition_bit = 0;
+          assign respond         = 1;
         end
       end
 
       6 : // Shift_right
       begin
-        assign make_result = data1 >> data2 [4:0];
-        assign resp=1;
-        assign flow =0;
+        assign make_result     = data_a >> data_b [4:0];
+        assign respond         = 1;
+        assign recognition_bit = 0;
         end
 
       5 : // Shift_left
       begin
-        assign make_result = data1 << data2 [4:0];
-        assign resp=1;
-        assign flow=0;
+        assign make_result     = data_a << data_b [4:0];
+        assign respond         = 1;
+        assign recognition_bit = 0;
       end
 
       default: // for invalid commands
       begin
-        assign flow = 0;
-        assign resp = 2;
-        assign make_result = 0;
+        assign recognition_bit = 0;
+        assign respond         = 2;
+        assign make_result     = 32'b0;
       end
       
     endcase
 
   endfunction
 
-  // path_file use for changeable file name
+  // FILEPATH use for changeable file name
 
-  string path_file ="Golden_result_log_Px.txt";
+  string FILE_PATH ="Golden_result_log_Px.txt";
 
   initial
   begin
     /*
      change "x" in "Golden_result_log_Px.txt" to Port_number
-     Each port has its own Golden model, and the results are stored
-     in separate files marked with the number of each port.
+     Each PORT_NUMBER has its own Golden model, and the results are stored
+     in separate files marked with the number of each PORT_NUMBER.
 
      *************************************************************
-     putc(19,port) command us for this purpose
+     putc(19,PORT_NUMBER) command us for this purpose
      */
-    path_file.putc(19,port);
-    file_id = $fopen(path_file,"a+");
-    $fwrite(file_id,":::::::::::::::::::::::::::::: Golden result Port%s ::::::::::::::::::::::::::::::::::::::::\n",port);
+    FILE_PATH.putc(19,PORT_NUMBER);
+    FILE_ID = $fopen(FILE_PATH,"w");
+    $fwrite(FILE_ID,":::::::::::::::::::::::::::::: Golden result Port%s ::::::::::::::::::::::::::::::::::::::::\n",PORT_NUMBER);
 
     forever
     begin
-      result_paket_out_temp = 0;
-      exp_resp = 0;
-      s_flow = 0;
-      if(paket_in[67:64]==0)begin
-        result_paket_out_temp =0;
-        exp_resp = 0;
-        s_flow = 0;
-        exp_tag = 0;
+
+      temporary_result      = 0;
+      expected_response     = 0;
+      recognition_bit       = 0;
+
+      if(packet_imported[67:64]==0)begin
+        
+        temporary_result      = 0;
+        expected_response     = 0;
+        recognition_bit       = 0;
+        expected_tag          = 0;
+
       end
       else begin
-      result_paket_out_temp= make_result(paket_in[63:32],paket_in[31:0],paket_in[67:64],exp_resp,s_flow);
-      exp_tag = paket_in[69:68];
+      temporary_result= make_result(packet_imported[63:32],packet_imported[31:0],packet_imported[67:64],expected_response,recognition_bit);
+      expected_tag = packet_imported[69:68];
       end
-      /*
-        result_paket _out was 49 bit ==>  {8 bit string as port number} + {4 bit as commad}
-                                        + {2 bit as tag} + {2 bit respond} + {32 bit result} 
-                                        + {1 bit as over/under flow signalca}   
-      */
 
-      assign result_paket_out = {port,paket_in[67:64],exp_tag,exp_resp,result_paket_out_temp,s_flow};
-
+    // output_packet_result was 38 bit ==>{1 bit flag }+ {2 bit as tag} + {2 bit respond} + {32 bit result} + {1 bit as over/underflow signal}   
+     
+      assign output_packet_result = {expected_tag,expected_response,temporary_result,recognition_bit};
+      
       /*
         Printing conditions in txt file: If respond was 0 or cmd was not set,
         which is usually equal to x, nothing is written in the file,
         but if these conditions are not met, there are different conditions for writing in the file,
         a condition for overflow In the addition operation and another 
         for the underflow in the subtraction operation,
-        otherwise cmd and tag, port number, first and second data,
+        otherwise cmd and tag, PORT_NUMBER number, first and second data,
         operation result and respond are printed in the file.
       */
 
-      if(exp_resp!==0 & paket_in[67:64]!==4'hx)
+      if(expected_response!==0 & packet_imported[67:64]!==4'hx)
       begin
-        if(s_flow!==0)
+        if(recognition_bit!==0)
         begin
-          if(paket_in[67:64]==4'b0010)
+          if(packet_imported[67:64]==4'b0010)
             // subtract Underflow status
-            $fwrite(file_id,":: Port%s cmd:%h tag::%h Data1:%h Data2:%h Result:%h Resp::%h :: Underflow ::\n"
-                    ,result_paket_out[48:41]  // Port_number
-                    ,result_paket_out[40:37]  // Command Type
-                    ,result_paket_out[36:35]  // Tag_number
-                    ,paket_in[63:32]          // Data_in_1
-                    ,paket_in[31:0]           // Data_in_2
-                    ,result_paket_out[32:1]   // Result_data
-                    ,result_paket_out[34:33]);// Exp_Respond
+            $fwrite(FILE_ID,":: Port%s cmd:%h tag::%h Data1:%h Data2:%h Result:%h Resp::%h :: Underflow ::\n"
+                    ,PORT_NUMBER                     // Port_number
+                    ,packet_imported[67:64]          // Command Type
+                    ,output_packet_result[36:35]     // Tag_number
+                    ,packet_imported[63:32]          // Data_in_1
+                    ,packet_imported[31:0]           // Data_in_2
+                    ,output_packet_result[32:1]      // Result_data
+                    ,output_packet_result[34:33]);   // Exp_Respond
           else
-            // Sum Overflow status
-            $fwrite(file_id,":: Port%s cmd:%h tag::%h Data1:%h Data2:%h Result:%h Resp::%h :: Overflow  ::\n"
-                    ,result_paket_out[48:41]
-                    ,result_paket_out[40:37]
-                    ,result_paket_out[36:35]
-                    ,paket_in[63:32]
-                    ,paket_in[31:0]
-                    ,result_paket_out[32:1]
-                    ,result_paket_out[34:33]);
+            // Sum/Shift Overflow status
+            $fwrite(FILE_ID,":: Port%s cmd:%h tag::%h Data1:%h Data2:%h Result:%h Resp::%h :: Overflow  ::\n"
+                    ,PORT_NUMBER
+                    ,packet_imported[67:64]
+                    ,output_packet_result[36:35]
+                    ,packet_imported[63:32]
+                    ,packet_imported[31:0]
+                    ,output_packet_result[32:1]
+                    ,output_packet_result[34:33]);
+                    
         end
         else
           // Normal Status
-          $fwrite(file_id,":: Port%s cmd:%h tag::%h Data1:%h Data2:%h Result:%h Resp::%h\n"
-                  ,result_paket_out[48:41]
-                  ,result_paket_out[40:37]
-                  ,result_paket_out[36:35]
-                  ,paket_in[63:32]
-                  ,paket_in[31:0]
-                  ,result_paket_out[32:1]
-                  ,result_paket_out[34:33]);
+          $fwrite(FILE_ID,":: Port%s cmd:%h tag::%h Data1:%h Data2:%h Result:%h Resp::%h\n"
+                  ,PORT_NUMBER
+                  ,packet_imported[67:64]
+                  ,output_packet_result[36:35]
+                  ,packet_imported[63:32]
+                  ,packet_imported[31:0]
+                  ,output_packet_result[32:1]
+                  ,output_packet_result[34:33]);
       end
-      @(posedge clk);
+      @(packet_imported);
     end
-    $fclose(file_id);
+    // $fclose(FILE_ID);
 
   end
 
