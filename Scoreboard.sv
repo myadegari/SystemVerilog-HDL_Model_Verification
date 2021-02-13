@@ -112,12 +112,20 @@
 
           task get(input [1:0] tag_received_from_checker,output bit [69:0] submission_command,output bit [36:0] submission_expected_result,output bit result_type_detection_flag);
             begin
+              bit detection_flag;
               int received_tag_index [$];
               int empty_queue_for_comparison_criteria [$];
+              reg [36:0] holds_the_expected_results;
               bit [36:0] fetch_expected_result;
               bit [69:0] fetch_command;
               bit stray_data_detection_flag;
-
+              /******************
+              //debug file
+              // int FILE_ID;
+              // string FILE_PATH ="score_log_Px.txt";
+              // FILE_PATH.putc(11,Port_number);
+              // FILE_ID= $fopen(FILE_PATH,"a+");
+              /************************
               /*
               Using the tag received from the checker,
               it searches the tag queues and, if any,
@@ -127,7 +135,20 @@
               */
 
               received_tag_index = queue_of_input_tags.find_first_index(x) with (x == tag_received_from_checker);
-
+              //Check that the data queue size matches the commands and if the data queue size does not match the commands
+              if(queue_of_input_commands.size()!= queue_of_expected_results.size()) begin
+                  detection_flag=1;
+                  while(detection_flag)
+                  begin
+                    if(queue_of_expected_results.size()==queue_of_input_commands.size())begin
+                    detection_flag=0;
+                    end
+                    else
+                    holds_the_expected_results=queue_of_expected_results.pop_front();
+                  end
+                end
+              // commented line for debugging
+              // $fwrite(FILE_ID,"tag::%h\nqeue::%p\n comand::%h\n expec::%h\n exp::%p\n cmd::%p\n",tag_received_from_checker,queue_of_input_tags,queue_of_input_commands[received_tag_index[0]][67:64],queue_of_expected_results[received_tag_index[0]][32:1],queue_of_expected_results,queue_of_input_commands);
 
               if(received_tag_index != empty_queue_for_comparison_criteria)
               begin
@@ -165,6 +186,7 @@
                 result_type_detection_flag = 1;
 
               end
+              // $fclose(FILE_ID);
             end
           endtask
         endclass

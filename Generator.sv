@@ -53,12 +53,12 @@ class TestGenerator;
     $write("%dns : Generator activated\n",$time);
     full_Test_Selector();
     $write("%dns : Generator finished\n",$time);
-  endtask //
+  endtask 
 
-  task Simultaneous_Test (int case_sel=4,int make_test=800); // Simultaneous testing of all ports with a common scenario
-     IReset();
-     @(posedge GlobalPort.clk);
-     GlobalPort.reset     = 0;
+  task Simultaneous_Test (int case_sel=4, int make_test=80); // Simultaneous testing of all ports with a common scenarios
+    IReset();
+    @(posedge GlobalPort.clk);
+    GlobalPort.reset     = 0;
     $write("%dns : Simultaneous Test activated\n",$time);
     fork
       testP1(case_sel,make_test);
@@ -78,30 +78,29 @@ class TestGenerator;
 
     for(int test_count = 1;test_count<5;test_count++)
     begin
-       for(int case_count = 0;case_count<8;case_count++)
+      for(int case_count = 0;case_count<7;case_count++)
       begin
         IReset();
         @(posedge GlobalPort.clk);
         GlobalPort.reset = 0;
-        case(test_count)
-
-          1:testP1(case_count);
+        case (test_count)
+          default:testP1(case_count);
           2:testP2(case_count);
           3:testP3(case_count);
           4:testP4(case_count);
-         
         endcase
       end
     end
     Simultaneous_Test();
     Make_Shift_out_of_order_result ();
     Make_AddSub_out_of_order_result ();
+    SimultaneousStaticTest ();
     $write("%dns: End Random Test Selector\n",$time);
     repeat(100)@(posedge GlobalPort.clk);
     -> Finish;
 
   endtask
-  
+
 
   task IReset(int remain = 2);
     begin
@@ -133,18 +132,26 @@ class TestGenerator;
 
 
 
-task testP1(int testcase_number =4, int make_test=20); // Test Case scenarios for Port1 with default test case number 4
+  task testP1(int testcase_number =4, int make_test=20); // Test Case scenarios for Port1 with default test case number 4
     begin
 
       case(testcase_number)
-        0: // Add and sub Testcases
+        default: // Add and sub Testcases
         begin
           //Test cases for Add
           $write("%dns :Start Checking Add/Sub commands in Port1.\n",$time);
 
           DrivePort1.Add(50,22,0); // Simple Add test
           DrivePort1.Add(50,0, 1); // One operand is zero
+          DrivePort1.Add(22,0, 2); // One operand is zero
+          DrivePort1.Add(33,0, 3); // One operand is zero
+          DrivePort1.Add(44,0, 0); // One operand is zero
+          DrivePort1.Add(45,0, 1); // One operand is zero
           DrivePort1.Add(0,22, 2); // One operand is zero
+          DrivePort1.Add(0,23, 3); // One operand is zero
+          DrivePort1.Add(0,24, 0); // One operand is zero
+          DrivePort1.Add(0,25, 1); // One operand is zero
+          DrivePort1.Add(0,26, 2); // One operand is zero
           DrivePort1.Add(0, 0, 3); // two Operands is zero
 
           repeat(10)@(posedge GlobalPort.clk);
@@ -159,11 +166,19 @@ task testP1(int testcase_number =4, int make_test=20); // Test Case scenarios fo
 
           DrivePort1.Sub(50,22,2); // Simple Subtract test
           DrivePort1.Sub(50,0, 3); // One Operand is zero
+          DrivePort1.Sub(40,0, 0); // One Operand is zero
+          DrivePort1.Sub(20,0, 1); // One Operand is zero
+          DrivePort1.Sub(10,0, 2); // One Operand is zero
+          DrivePort1.Sub(15,0, 3); // One Operand is zero
           DrivePort1.Sub(0,22, 0); // One Operand is zero
+          DrivePort1.Sub(0,24, 1); // One Operand is zero
+          DrivePort1.Sub(0,25, 2); // One Operand is zero
+          DrivePort1.Sub(0,26, 3); // One Operand is zero
+          DrivePort1.Sub(0,28, 0); // One Operand is zero
           DrivePort1.Sub(0, 0, 1); // two Operands is zero
-          
+
           repeat(10)@(posedge GlobalPort.clk);
-          
+
           DrivePort1.Sub(50,50,2); // Two equal Operands in Sub
           DrivePort1.Sub(50,51,3); // Make Underflow by 1
           //--------------------------------------------------------------------------------------------//
@@ -172,9 +187,25 @@ task testP1(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           DrivePort1.Add('hEFFFFFEF,'h10000011,0);
+          DrivePort1.Add('hEFFFFFEE,'h10000012,1);
+          DrivePort1.Add('hEFFFFFED,'h10000013,2);
+          DrivePort1.Add('hEFFFFFEC,'h10000014,3);
+          DrivePort1.Add('hEFFFFFEB,'h10000015,0);
           DrivePort1.Sub(0,1,1);
+          DrivePort1.Sub(1,2,2);
+          DrivePort1.Sub(2,3,3);
+          DrivePort1.Sub(3,4,0);
+          DrivePort1.Sub(4,5,1);
           DrivePort1.Add('hFFFFFFFF,3,2);
+          DrivePort1.Add('hFFFFFFFF,4,3);
+          DrivePort1.Add('hFFFFFFFF,5,0);
+          DrivePort1.Add('hFFFFFFFF,6,1);
+          DrivePort1.Add('hFFFFFFFF,7,2);
           DrivePort1.Sub('hFFFFFFFC,'hFFFFFFFE,3);
+          DrivePort1.Sub('hFFFFFFFb,'hFFFFFFFd,0);
+          DrivePort1.Sub('hFFFFFFFa,'hFFFFFFFc,1);
+          DrivePort1.Sub('hFFFFFFF9,'hFFFFFFFb,2);
+          DrivePort1.Sub('hFFFFFFF8,'hFFFFFFFa,3);
 
 
           $write("%dns :End of Checking Add/Sub in Port1.\n",$time);
@@ -185,12 +216,27 @@ task testP1(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           $write("%dns :Start Checking Shift Commands in Port1.\n",$time);
 
           DrivePort1.SHL('1,'0,0);            // Make Zero Shift Left
-          DrivePort1.SHL(1,32,1);                    // Make 32 Shift Left
+          DrivePort1.SHL(56,'0,1);            // Make Zero Shift Left
+          DrivePort1.SHL(52,'0,2);            // Make Zero Shift Left
+          DrivePort1.SHL(456,'0,3);           // Make Zero Shift Left
+          DrivePort1.SHL(1225,'0,0);          // Make Zero Shift Left
+          DrivePort1.SHL(1,32,1);             // Make 32 Shift Left
+          DrivePort1.SHL(2,32,2);             // Make 32 Shift Left
+          DrivePort1.SHL(15,32,3);            // Make 32 Shift Left
+          DrivePort1.SHL(32,32,0);            // Make 32 Shift Left
+          DrivePort1.SHL(45,32,1);            // Make 32 Shift Left
           DrivePort1.SHR('1,'0,2);            // Make Zero Shift Right
-          DrivePort1.SHR('h10000000,5'b1,3);         // Make 32 Shift Right
-          repeat(10)@(posedge GlobalPort.clk);
-          DrivePort1.SHL('he11d33e8,'h603a86c1,0);           // 1 bit overflow in left Shift
-          DrivePort1.SHL('h097ec66a,'h8b3fed4a,1);           // 6 bit overflow in left Shift
+          DrivePort1.SHR(45,'0,3);            // Make Zero Shift Right
+          DrivePort1.SHR(12,'0,0);            // Make Zero Shift Right
+          DrivePort1.SHR(14,'0,1);            // Make Zero Shift Right
+          DrivePort1.SHR(15,'0,2);            // Make Zero Shift Right
+          DrivePort1.SHR('h10000000,5'b1,3);  // Make 32 Shift Right
+          DrivePort1.SHR(535,5'b1,0);         // Make 32 Shift Right
+          DrivePort1.SHR(632,5'b1,1);         // Make 32 Shift Right
+          DrivePort1.SHR(425,5'b1,2);         // Make 32 Shift Right
+          DrivePort1.SHR(200,5'b1,3);         // Make 32 Shift Right
+          DrivePort1.SHL('he11d33e8,'h603a86c1,0);    // 1 bit overflow in left Shift
+          DrivePort1.SHL('h097ec66a,'h8b3fed4a,1);    // 6 bit overflow in left Shift
           DrivePort1.SHL('1,'1,2);
           DrivePort1.SHR('1,'1,3);
           repeat(10)@(posedge GlobalPort.clk);
@@ -211,8 +257,16 @@ task testP1(int testcase_number =4, int make_test=20); // Test Case scenarios fo
 
           DrivePort1.SHL('hFFFFFFF0,'hFFFFFFE2, 0);
           DrivePort1.SHL('hFFFFFFF0,'hFEFEFEE1, 1);
+          DrivePort1.SHL('hFFFFFFF0,'hFEFEFEE3, 2);
+          DrivePort1.SHL('hFFFFFFF0,'hFEFEFEE4, 3);
+          DrivePort1.SHL('hFFFFFFF0,'hFEFEFEE5, 0);
+          DrivePort1.SHL('hFFFFFFF0,'hFEFEFEE6, 1);
           DrivePort1.SHR('h0FFFFFFF,'hFFFFFFE2, 2);
           DrivePort1.SHR('h0FFFFFFF,'hFEFEFEE1, 3);
+          DrivePort1.SHR('h0FFFFFFF,'hFEFEFEE2, 0);
+          DrivePort1.SHR('h0FFFFFFF,'hFEFEFEE3, 1);
+          DrivePort1.SHR('h0FFFFFFF,'hFEFEFEE4, 2);
+          DrivePort1.SHR('h0FFFFFFF,'hFEFEFEE5, 3);
 
           repeat(10)@(posedge GlobalPort.clk);
 
@@ -234,13 +288,14 @@ task testP1(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           // -----------! Make 4 Add/Sub or Shift Commands with random order !--------------------//
-          repeat(10) begin
-          repeat(4)
+          repeat(10)
           begin
-            assert(RandP1.randomize());
-            RandP1.do_RandCase(50,100,0,50,50,50,0);
-          end
-          repeat(10)@(posedge GlobalPort.clk);
+            repeat(4)
+            begin
+              assert(RandP1.randomize());
+              RandP1.do_RandCase(50,100,0,50,50,50,0);
+            end
+            repeat(10)@(posedge GlobalPort.clk);
           end
           $write("%dns :End of Checking the sequence and prioritize the execution of commands in Port1.\n",$time);
         end
@@ -285,32 +340,22 @@ task testP1(int testcase_number =4, int make_test=20); // Test Case scenarios fo
         4:
         begin
           $write("%dns :Start sending %0d random valid command in Port1.\n",$time,make_test*4);
-          repeat(make_test) begin
-          repeat(4) begin
-          assert(RandP1.randomize());
-          RandP1.full_random_valid_command();
-          end
-          assert(RandP1.randomize());
-          repeat(RandP1.time_delay)@(posedge GlobalPort.clk);
+          repeat(make_test)
+          begin
+            repeat(4)
+            begin
+              assert(RandP1.randomize());
+              RandP1.full_random_valid_command();
+            end
+            assert(RandP1.randomize());
+            repeat(RandP1.time_delay)@(posedge GlobalPort.clk);
           end
           $write("%dns :End of sending %0d random valid command in Port1.\n",$time,make_test*4);
         end
 
+
         5:
         begin
-          $write("%dns :Start Send data at the same time as the reset is active in Port1.\n",$time);
-          GlobalPort.reset=1;
-
-          repeat(4)
-          begin
-            assert(RandP1.randomize());
-            RandP1.do_RandCase(45,50,50,45,50,50,10);
-          end
-          GlobalPort.reset = 0;
-          $write("%dns :End of Send data at the same time as the reset is active in Port1.\n",$time);
-        end
-
-        6:begin
           $write("%dns :Start Checking Send multiple commands from the same port with the same tags in Port1.\n",$time);
 
           //-------! Send multiple commands from the same port with the same tags !------//
@@ -353,9 +398,10 @@ task testP1(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           $write("%dns :End of Checking Send multiple commands from the same port with the same tags in Port1.\n",$time);
-        
+
         end
-        7:begin
+        6:
+        begin
           $write("%dns :Start Checking Submit multiple identical commands with different tags in Port1.\n",$time);
 
           repeat(4)
@@ -366,32 +412,40 @@ task testP1(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           $write("%dns :End Checking Submit multiple identical commands with different tags in Port1.\n",$time);
-        
+
         end
-        8:begin
-          repeat(3) begin
-          assert(RandP1.randomize());
-          RandP1.do_RandCase(100,50,50,0,0,0,0);
+        7:
+        begin
+          repeat(3)
+          begin
+            assert(RandP1.randomize());
+            RandP1.do_RandCase(100,50,50,0,0,0,0);
           end
           assert(RandP1.randomize());
           RandP1.do_RandCase(0,0,0,100,50,50,0);
         end
-        9:begin
-          repeat(4)begin
+        8:
+        begin
+          repeat(4)
+          begin
             assert(RandP1.randomize());
             RandP1.do_RandCase(100,50,50,0,0,0,0);
           end
         end
-        10:begin
-          repeat(3) begin
-          assert(RandP1.randomize());
-          RandP1.do_RandCase(0,0,0,100,50,50,0);
+        9:
+        begin
+          repeat(3)
+          begin
+            assert(RandP1.randomize());
+            RandP1.do_RandCase(0,0,0,100,50,50,0);
           end
           assert(RandP1.randomize());
           RandP1.do_RandCase(100,50,50,0,0,0,0);
         end
-        11:begin
-          repeat(4)begin
+        10:
+        begin
+          repeat(4)
+          begin
             assert(RandP1.randomize());
             RandP1.do_RandCase(0,0,0,100,50,50,0);
           end
@@ -400,18 +454,26 @@ task testP1(int testcase_number =4, int make_test=20); // Test Case scenarios fo
 
     end
   endtask
-task testP2(int testcase_number =4, int make_test=20); // Test Case scenarios for Port2 with default test case number 4
+  task testP2(int testcase_number =4, int make_test=20); // Test Case scenarios for Port2 with default test case number 4
     begin
 
       case(testcase_number)
-        0: // Add and sub Testcases
+        default: // Add and sub Testcases
         begin
           //Test cases for Add
           $write("%dns :Start Checking Add/Sub commands in Port2.\n",$time);
 
           DrivePort2.Add(50,22,0); // Simple Add test
           DrivePort2.Add(50,0, 1); // One operand is zero
+          DrivePort2.Add(22,0, 2); // One operand is zero
+          DrivePort2.Add(33,0, 3); // One operand is zero
+          DrivePort2.Add(44,0, 0); // One operand is zero
+          DrivePort2.Add(45,0, 1); // One operand is zero
           DrivePort2.Add(0,22, 2); // One operand is zero
+          DrivePort2.Add(0,23, 3); // One operand is zero
+          DrivePort2.Add(0,24, 0); // One operand is zero
+          DrivePort2.Add(0,25, 1); // One operand is zero
+          DrivePort2.Add(0,26, 2); // One operand is zero
           DrivePort2.Add(0, 0, 3); // two Operands is zero
 
           repeat(10)@(posedge GlobalPort.clk);
@@ -426,11 +488,19 @@ task testP2(int testcase_number =4, int make_test=20); // Test Case scenarios fo
 
           DrivePort2.Sub(50,22,2); // Simple Subtract test
           DrivePort2.Sub(50,0, 3); // One Operand is zero
+          DrivePort2.Sub(40,0, 0); // One Operand is zero
+          DrivePort2.Sub(20,0, 1); // One Operand is zero
+          DrivePort2.Sub(10,0, 2); // One Operand is zero
+          DrivePort2.Sub(15,0, 3); // One Operand is zero
           DrivePort2.Sub(0,22, 0); // One Operand is zero
+          DrivePort2.Sub(0,24, 1); // One Operand is zero
+          DrivePort2.Sub(0,25, 2); // One Operand is zero
+          DrivePort2.Sub(0,26, 3); // One Operand is zero
+          DrivePort2.Sub(0,28, 0); // One Operand is zero
           DrivePort2.Sub(0, 0, 1); // two Operands is zero
-          
+
           repeat(10)@(posedge GlobalPort.clk);
-          
+
           DrivePort2.Sub(50,50,2); // Two equal Operands in Sub
           DrivePort2.Sub(50,51,3); // Make Underflow by 1
           //--------------------------------------------------------------------------------------------//
@@ -439,10 +509,25 @@ task testP2(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           DrivePort2.Add('hEFFFFFEF,'h10000011,0);
+          DrivePort2.Add('hEFFFFFEE,'h10000012,1);
+          DrivePort2.Add('hEFFFFFED,'h10000013,2);
+          DrivePort2.Add('hEFFFFFEC,'h10000014,3);
+          DrivePort2.Add('hEFFFFFEB,'h10000015,0);
           DrivePort2.Sub(0,1,1);
+          DrivePort2.Sub(1,2,2);
+          DrivePort2.Sub(2,3,3);
+          DrivePort2.Sub(3,4,0);
+          DrivePort2.Sub(4,5,1);
           DrivePort2.Add('hFFFFFFFF,3,2);
+          DrivePort2.Add('hFFFFFFFF,4,3);
+          DrivePort2.Add('hFFFFFFFF,5,0);
+          DrivePort2.Add('hFFFFFFFF,6,1);
+          DrivePort2.Add('hFFFFFFFF,7,2);
           DrivePort2.Sub('hFFFFFFFC,'hFFFFFFFE,3);
-
+          DrivePort2.Sub('hFFFFFFFb,'hFFFFFFFd,0);
+          DrivePort2.Sub('hFFFFFFFa,'hFFFFFFFc,1);
+          DrivePort2.Sub('hFFFFFFF9,'hFFFFFFFb,2);
+          DrivePort2.Sub('hFFFFFFF8,'hFFFFFFFa,3);
 
           $write("%dns :End of Checking Add/Sub in Port2.\n",$time);
         end
@@ -452,12 +537,27 @@ task testP2(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           $write("%dns :Start Checking Shift Commands in Port2.\n",$time);
 
           DrivePort2.SHL('1,'0,0);            // Make Zero Shift Left
-          DrivePort2.SHL(1,32,1);                    // Make 32 Shift Left
+          DrivePort2.SHL(56,'0,1);            // Make Zero Shift Left
+          DrivePort2.SHL(52,'0,2);            // Make Zero Shift Left
+          DrivePort2.SHL(456,'0,3);           // Make Zero Shift Left
+          DrivePort2.SHL(1225,'0,0);          // Make Zero Shift Left
+          DrivePort2.SHL(1,32,1);             // Make 32 Shift Left
+          DrivePort2.SHL(2,32,2);             // Make 32 Shift Left
+          DrivePort2.SHL(15,32,3);            // Make 32 Shift Left
+          DrivePort2.SHL(32,32,0);            // Make 32 Shift Left
+          DrivePort2.SHL(45,32,1);            // Make 32 Shift Left
           DrivePort2.SHR('1,'0,2);            // Make Zero Shift Right
-          DrivePort2.SHR('h10000000,32,3);         // Make 32 Shift Right
-          repeat(10)@(posedge GlobalPort.clk);
-          DrivePort2.SHL('he11d33e8,'h603a86c1,0);           // 1 bit overflow in left Shift
-          DrivePort2.SHL('h097ec66a,'h8b3fed4a,1);           // 6 bit overflow in left Shift
+          DrivePort2.SHR(45,'0,3);            // Make Zero Shift Right
+          DrivePort2.SHR(12,'0,0);            // Make Zero Shift Right
+          DrivePort2.SHR(14,'0,1);            // Make Zero Shift Right
+          DrivePort2.SHR(15,'0,2);            // Make Zero Shift Right
+          DrivePort2.SHR('h10000000,5'b1,3);  // Make 32 Shift Right
+          DrivePort2.SHR(535,5'b1,0);         // Make 32 Shift Right
+          DrivePort2.SHR(632,5'b1,1);         // Make 32 Shift Right
+          DrivePort2.SHR(425,5'b1,2);         // Make 32 Shift Right
+          DrivePort2.SHR(200,5'b1,3);         // Make 32 Shift Right
+          DrivePort2.SHL('he11d33e8,'h603a86c1,0);    // 1 bit overflow in left Shift
+          DrivePort2.SHL('h097ec66a,'h8b3fed4a,1);    // 6 bit overflow in left Shift
           DrivePort2.SHL('1,'1,2);
           DrivePort2.SHR('1,'1,3);
           repeat(10)@(posedge GlobalPort.clk);
@@ -478,8 +578,16 @@ task testP2(int testcase_number =4, int make_test=20); // Test Case scenarios fo
 
           DrivePort2.SHL('hFFFFFFF0,'hFFFFFFE2, 0);
           DrivePort2.SHL('hFFFFFFF0,'hFEFEFEE1, 1);
+          DrivePort2.SHL('hFFFFFFF0,'hFEFEFEE3, 2);
+          DrivePort2.SHL('hFFFFFFF0,'hFEFEFEE4, 3);
+          DrivePort2.SHL('hFFFFFFF0,'hFEFEFEE5, 0);
+          DrivePort2.SHL('hFFFFFFF0,'hFEFEFEE6, 1);
           DrivePort2.SHR('h0FFFFFFF,'hFFFFFFE2, 2);
           DrivePort2.SHR('h0FFFFFFF,'hFEFEFEE1, 3);
+          DrivePort2.SHR('h0FFFFFFF,'hFEFEFEE2, 0);
+          DrivePort2.SHR('h0FFFFFFF,'hFEFEFEE3, 1);
+          DrivePort2.SHR('h0FFFFFFF,'hFEFEFEE4, 2);
+          DrivePort2.SHR('h0FFFFFFF,'hFEFEFEE5, 3);
 
           repeat(10)@(posedge GlobalPort.clk);
 
@@ -501,13 +609,14 @@ task testP2(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           // -----------! Make 4 Add/Sub or Shift Commands with random order !--------------------//
-          repeat(10) begin
-          repeat(4)
+          repeat(10)
           begin
-            assert(RandP2.randomize());
-            RandP2.do_RandCase(50,100,0,50,50,50,0);
-          end
-          repeat(10)@(posedge GlobalPort.clk);
+            repeat(4)
+            begin
+              assert(RandP2.randomize());
+              RandP2.do_RandCase(50,100,0,50,50,50,0);
+            end
+            repeat(10)@(posedge GlobalPort.clk);
           end
           $write("%dns :End of Checking the sequence and prioritize the execution of commands in Port2.\n",$time);
         end
@@ -552,32 +661,22 @@ task testP2(int testcase_number =4, int make_test=20); // Test Case scenarios fo
         4:
         begin
           $write("%dns :Start sending %0d random valid command in Port2.\n",$time,make_test*4);
-          repeat(make_test) begin
-          repeat(4) begin
-          assert(RandP2.randomize());
-          RandP2.full_random_valid_command();
-          end
-          assert(RandP2.randomize());
-          repeat(RandP2.time_delay)@(posedge GlobalPort.clk);
+          repeat(make_test)
+          begin
+            repeat(4)
+            begin
+              assert(RandP2.randomize());
+              RandP2.full_random_valid_command();
+            end
+            assert(RandP2.randomize());
+            repeat(RandP2.time_delay)@(posedge GlobalPort.clk);
           end
           $write("%dns :End of sending %0d random valid command in Port2.\n",$time,make_test*4);
         end
 
+
         5:
         begin
-          $write("%dns :Start Send data at the same time as the reset is active in Port2.\n",$time);
-          GlobalPort.reset=1;
-
-          repeat(4)
-          begin
-            assert(RandP2.randomize());
-            RandP2.do_RandCase(45,50,50,45,50,50,10);
-          end
-          GlobalPort.reset = 0;
-          $write("%dns :End of Send data at the same time as the reset is active in Port2.\n",$time);
-        end
-
-        6:begin
           $write("%dns :Start Checking Send multiple commands from the same port with the same tags in Port2.\n",$time);
 
           //-------! Send multiple commands from the same port with the same tags !------//
@@ -620,9 +719,10 @@ task testP2(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           $write("%dns :End of Checking Send multiple commands from the same port with the same tags in Port2.\n",$time);
-        
+
         end
-        7:begin
+        6:
+        begin
           $write("%dns :Start Checking Submit multiple identical commands with different tags in Port2.\n",$time);
 
           repeat(4)
@@ -633,32 +733,40 @@ task testP2(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           $write("%dns :End Checking Submit multiple identical commands with different tags in Port2.\n",$time);
-        
+
         end
-        8:begin
-          repeat(3) begin
-          assert(RandP2.randomize());
-          RandP2.do_RandCase(100,50,50,0,0,0,0);
+        7:
+        begin
+          repeat(3)
+          begin
+            assert(RandP2.randomize());
+            RandP2.do_RandCase(100,50,50,0,0,0,0);
           end
           assert(RandP2.randomize());
           RandP2.do_RandCase(0,0,0,100,50,50,0);
         end
-        9:begin
-          repeat(4)begin
+        8:
+        begin
+          repeat(4)
+          begin
             assert(RandP2.randomize());
             RandP2.do_RandCase(100,50,50,0,0,0,0);
           end
         end
-        10:begin
-          repeat(3) begin
-          assert(RandP2.randomize());
-          RandP2.do_RandCase(0,0,0,100,50,50,0);
+        9:
+        begin
+          repeat(3)
+          begin
+            assert(RandP2.randomize());
+            RandP2.do_RandCase(0,0,0,100,50,50,0);
           end
           assert(RandP2.randomize());
           RandP2.do_RandCase(100,50,50,0,0,0,0);
         end
-        11:begin
-          repeat(4)begin
+        10:
+        begin
+          repeat(4)
+          begin
             assert(RandP2.randomize());
             RandP2.do_RandCase(0,0,0,100,50,50,0);
           end
@@ -667,18 +775,26 @@ task testP2(int testcase_number =4, int make_test=20); // Test Case scenarios fo
 
     end
   endtask
-task testP3(int testcase_number =4, int make_test=20); // Test Case scenarios for Port3 with default test case number 4
+  task testP3(int testcase_number =4, int make_test=20); // Test Case scenarios for Port3 with default test case number 4
     begin
 
       case(testcase_number)
-        0: // Add and sub Testcases
+        default: // Add and sub Testcases
         begin
           //Test cases for Add
           $write("%dns :Start Checking Add/Sub commands in Port3.\n",$time);
 
           DrivePort3.Add(50,22,0); // Simple Add test
           DrivePort3.Add(50,0, 1); // One operand is zero
+          DrivePort3.Add(22,0, 2); // One operand is zero
+          DrivePort3.Add(33,0, 3); // One operand is zero
+          DrivePort3.Add(44,0, 0); // One operand is zero
+          DrivePort3.Add(45,0, 1); // One operand is zero
           DrivePort3.Add(0,22, 2); // One operand is zero
+          DrivePort3.Add(0,23, 3); // One operand is zero
+          DrivePort3.Add(0,24, 0); // One operand is zero
+          DrivePort3.Add(0,25, 1); // One operand is zero
+          DrivePort3.Add(0,26, 2); // One operand is zero
           DrivePort3.Add(0, 0, 3); // two Operands is zero
 
           repeat(10)@(posedge GlobalPort.clk);
@@ -693,11 +809,19 @@ task testP3(int testcase_number =4, int make_test=20); // Test Case scenarios fo
 
           DrivePort3.Sub(50,22,2); // Simple Subtract test
           DrivePort3.Sub(50,0, 3); // One Operand is zero
+          DrivePort3.Sub(40,0, 0); // One Operand is zero
+          DrivePort3.Sub(20,0, 1); // One Operand is zero
+          DrivePort3.Sub(10,0, 2); // One Operand is zero
+          DrivePort3.Sub(15,0, 3); // One Operand is zero
           DrivePort3.Sub(0,22, 0); // One Operand is zero
+          DrivePort3.Sub(0,24, 1); // One Operand is zero
+          DrivePort3.Sub(0,25, 2); // One Operand is zero
+          DrivePort3.Sub(0,26, 3); // One Operand is zero
+          DrivePort3.Sub(0,28, 0); // One Operand is zero
           DrivePort3.Sub(0, 0, 1); // two Operands is zero
-          
+
           repeat(10)@(posedge GlobalPort.clk);
-          
+
           DrivePort3.Sub(50,50,2); // Two equal Operands in Sub
           DrivePort3.Sub(50,51,3); // Make Underflow by 1
           //--------------------------------------------------------------------------------------------//
@@ -706,9 +830,25 @@ task testP3(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           DrivePort3.Add('hEFFFFFEF,'h10000011,0);
+          DrivePort3.Add('hEFFFFFEE,'h10000012,1);
+          DrivePort3.Add('hEFFFFFED,'h10000013,2);
+          DrivePort3.Add('hEFFFFFEC,'h10000014,3);
+          DrivePort3.Add('hEFFFFFEB,'h10000015,0);
           DrivePort3.Sub(0,1,1);
+          DrivePort3.Sub(1,2,2);
+          DrivePort3.Sub(2,3,3);
+          DrivePort3.Sub(3,4,0);
+          DrivePort3.Sub(4,5,1);
           DrivePort3.Add('hFFFFFFFF,3,2);
+          DrivePort3.Add('hFFFFFFFF,4,3);
+          DrivePort3.Add('hFFFFFFFF,5,0);
+          DrivePort3.Add('hFFFFFFFF,6,1);
+          DrivePort3.Add('hFFFFFFFF,7,2);
           DrivePort3.Sub('hFFFFFFFC,'hFFFFFFFE,3);
+          DrivePort3.Sub('hFFFFFFFb,'hFFFFFFFd,0);
+          DrivePort3.Sub('hFFFFFFFa,'hFFFFFFFc,1);
+          DrivePort3.Sub('hFFFFFFF9,'hFFFFFFFb,2);
+          DrivePort3.Sub('hFFFFFFF8,'hFFFFFFFa,3);
 
 
           $write("%dns :End of Checking Add/Sub in Port3.\n",$time);
@@ -719,12 +859,27 @@ task testP3(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           $write("%dns :Start Checking Shift Commands in Port3.\n",$time);
 
           DrivePort3.SHL('1,'0,0);            // Make Zero Shift Left
-          DrivePort3.SHL(1,32,1);                    // Make 32 Shift Left
+          DrivePort3.SHL(56,'0,1);            // Make Zero Shift Left
+          DrivePort3.SHL(52,'0,2);            // Make Zero Shift Left
+          DrivePort3.SHL(456,'0,3);           // Make Zero Shift Left
+          DrivePort3.SHL(1225,'0,0);          // Make Zero Shift Left
+          DrivePort3.SHL(1,32,1);             // Make 32 Shift Left
+          DrivePort3.SHL(2,32,2);             // Make 32 Shift Left
+          DrivePort3.SHL(15,32,3);            // Make 32 Shift Left
+          DrivePort3.SHL(32,32,0);            // Make 32 Shift Left
+          DrivePort3.SHL(45,32,1);            // Make 32 Shift Left
           DrivePort3.SHR('1,'0,2);            // Make Zero Shift Right
-          DrivePort3.SHR('h10000000,32,3);         // Make 32 Shift Right
-          repeat(10)@(posedge GlobalPort.clk);
-          DrivePort3.SHL('he11d33e8,'h603a86c1,0);           // 1 bit overflow in left Shift
-          DrivePort3.SHL('h097ec66a,'h8b3fed4a,1);           // 6 bit overflow in left Shift
+          DrivePort3.SHR(45,'0,3);            // Make Zero Shift Right
+          DrivePort3.SHR(12,'0,0);            // Make Zero Shift Right
+          DrivePort3.SHR(14,'0,1);            // Make Zero Shift Right
+          DrivePort3.SHR(15,'0,2);            // Make Zero Shift Right
+          DrivePort3.SHR('h10000000,5'b1,3);  // Make 32 Shift Right
+          DrivePort3.SHR(535,5'b1,0);         // Make 32 Shift Right
+          DrivePort3.SHR(632,5'b1,1);         // Make 32 Shift Right
+          DrivePort3.SHR(425,5'b1,2);         // Make 32 Shift Right
+          DrivePort3.SHR(200,5'b1,3);         // Make 32 Shift Right
+          DrivePort3.SHL('he11d33e8,'h603a86c1,0);     // 1 bit overflow in left Shift
+          DrivePort3.SHL('h097ec66a,'h8b3fed4a,1);     // 6 bit overflow in left Shift
           DrivePort3.SHL('1,'1,2);
           DrivePort3.SHR('1,'1,3);
           repeat(10)@(posedge GlobalPort.clk);
@@ -745,8 +900,16 @@ task testP3(int testcase_number =4, int make_test=20); // Test Case scenarios fo
 
           DrivePort3.SHL('hFFFFFFF0,'hFFFFFFE2, 0);
           DrivePort3.SHL('hFFFFFFF0,'hFEFEFEE1, 1);
+          DrivePort3.SHL('hFFFFFFF0,'hFEFEFEE3, 2);
+          DrivePort3.SHL('hFFFFFFF0,'hFEFEFEE4, 3);
+          DrivePort3.SHL('hFFFFFFF0,'hFEFEFEE5, 0);
+          DrivePort3.SHL('hFFFFFFF0,'hFEFEFEE6, 1);
           DrivePort3.SHR('h0FFFFFFF,'hFFFFFFE2, 2);
           DrivePort3.SHR('h0FFFFFFF,'hFEFEFEE1, 3);
+          DrivePort3.SHR('h0FFFFFFF,'hFEFEFEE2, 0);
+          DrivePort3.SHR('h0FFFFFFF,'hFEFEFEE3, 1);
+          DrivePort3.SHR('h0FFFFFFF,'hFEFEFEE4, 2);
+          DrivePort3.SHR('h0FFFFFFF,'hFEFEFEE5, 3);
 
           repeat(10)@(posedge GlobalPort.clk);
 
@@ -768,13 +931,14 @@ task testP3(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           // -----------! Make 4 Add/Sub or Shift Commands with random order !--------------------//
-          repeat(10) begin
-          repeat(4)
+          repeat(10)
           begin
-            assert(RandP3.randomize());
-            RandP3.do_RandCase(50,100,0,50,50,50,0);
-          end
-          repeat(10)@(posedge GlobalPort.clk);
+            repeat(4)
+            begin
+              assert(RandP3.randomize());
+              RandP3.do_RandCase(50,100,0,50,50,50,0);
+            end
+            repeat(10)@(posedge GlobalPort.clk);
           end
           $write("%dns :End of Checking the sequence and prioritize the execution of commands in Port3.\n",$time);
         end
@@ -819,32 +983,21 @@ task testP3(int testcase_number =4, int make_test=20); // Test Case scenarios fo
         4:
         begin
           $write("%dns :Start sending %0d random valid command in Port3.\n",$time,make_test*4);
-          repeat(make_test) begin
-          repeat(4) begin
-          assert(RandP3.randomize());
-          RandP3.full_random_valid_command();
-          end
-          assert(RandP3.randomize());
-          repeat(RandP3.time_delay)@(posedge GlobalPort.clk);
+          repeat(make_test)
+          begin
+            repeat(4)
+            begin
+              assert(RandP3.randomize());
+              RandP3.full_random_valid_command();
+            end
+            assert(RandP3.randomize());
+            repeat(RandP3.time_delay)@(posedge GlobalPort.clk);
           end
           $write("%dns :End of sending %0d random valid command in Port3.\n",$time,make_test*4);
         end
 
         5:
         begin
-          $write("%dns :Start Send data at the same time as the reset is active in Port3.\n",$time);
-          GlobalPort.reset=1;
-
-          repeat(4)
-          begin
-            assert(RandP3.randomize());
-            RandP3.do_RandCase(45,50,50,45,50,50,10);
-          end
-          GlobalPort.reset = 0;
-          $write("%dns :End of Send data at the same time as the reset is active in Port3.\n",$time);
-        end
-
-        6:begin
           $write("%dns :Start Checking Send multiple commands from the same port with the same tags in Port3.\n",$time);
 
           //-------! Send multiple commands from the same port with the same tags !------//
@@ -887,9 +1040,10 @@ task testP3(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           $write("%dns :End of Checking Send multiple commands from the same port with the same tags in Port3.\n",$time);
-        
+
         end
-        7:begin
+        6:
+        begin
           $write("%dns :Start Checking Submit multiple identical commands with different tags in Port3.\n",$time);
 
           repeat(4)
@@ -900,32 +1054,40 @@ task testP3(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           $write("%dns :End Checking Submit multiple identical commands with different tags in Port3.\n",$time);
-        
+
         end
-        8:begin
-          repeat(3) begin
-          assert(RandP3.randomize());
-          RandP3.do_RandCase(100,50,50,0,0,0,0);
+        7:
+        begin
+          repeat(3)
+          begin
+            assert(RandP3.randomize());
+            RandP3.do_RandCase(100,50,50,0,0,0,0);
           end
           assert(RandP3.randomize());
           RandP3.do_RandCase(0,0,0,100,50,50,0);
         end
-        9:begin
-          repeat(4)begin
+        8:
+        begin
+          repeat(4)
+          begin
             assert(RandP3.randomize());
             RandP3.do_RandCase(100,50,50,0,0,0,0);
           end
         end
-        10:begin
-          repeat(3) begin
-          assert(RandP3.randomize());
-          RandP3.do_RandCase(0,0,0,100,50,50,0);
+        9:
+        begin
+          repeat(3)
+          begin
+            assert(RandP3.randomize());
+            RandP3.do_RandCase(0,0,0,100,50,50,0);
           end
           assert(RandP3.randomize());
           RandP3.do_RandCase(100,50,50,0,0,0,0);
         end
-        11:begin
-          repeat(4)begin
+        10:
+        begin
+          repeat(4)
+          begin
             assert(RandP3.randomize());
             RandP3.do_RandCase(0,0,0,100,50,50,0);
           end
@@ -935,18 +1097,26 @@ task testP3(int testcase_number =4, int make_test=20); // Test Case scenarios fo
     end
   endtask
 
-task testP4(int testcase_number =4, int make_test=20); // Test Case scenarios for Port4 with default test case number 4
+  task testP4(int testcase_number =4, int make_test=20); // Test Case scenarios for Port4 with default test case number 4
     begin
 
       case(testcase_number)
-        0: // Add and sub Testcases
+        default: // Add and sub Testcases
         begin
           //Test cases for Add
           $write("%dns :Start Checking Add/Sub commands in Port4.\n",$time);
 
           DrivePort4.Add(50,22,0); // Simple Add test
           DrivePort4.Add(50,0, 1); // One operand is zero
+          DrivePort4.Add(22,0, 2); // One operand is zero
+          DrivePort4.Add(33,0, 3); // One operand is zero
+          DrivePort4.Add(44,0, 0); // One operand is zero
+          DrivePort4.Add(45,0, 1); // One operand is zero
           DrivePort4.Add(0,22, 2); // One operand is zero
+          DrivePort4.Add(0,23, 3); // One operand is zero
+          DrivePort4.Add(0,24, 0); // One operand is zero
+          DrivePort4.Add(0,25, 1); // One operand is zero
+          DrivePort4.Add(0,26, 2); // One operand is zero
           DrivePort4.Add(0, 0, 3); // two Operands is zero
 
           repeat(10)@(posedge GlobalPort.clk);
@@ -961,11 +1131,19 @@ task testP4(int testcase_number =4, int make_test=20); // Test Case scenarios fo
 
           DrivePort4.Sub(50,22,2); // Simple Subtract test
           DrivePort4.Sub(50,0, 3); // One Operand is zero
+          DrivePort4.Sub(40,0, 0); // One Operand is zero
+          DrivePort4.Sub(20,0, 1); // One Operand is zero
+          DrivePort4.Sub(10,0, 2); // One Operand is zero
+          DrivePort4.Sub(15,0, 3); // One Operand is zero
           DrivePort4.Sub(0,22, 0); // One Operand is zero
+          DrivePort4.Sub(0,24, 1); // One Operand is zero
+          DrivePort4.Sub(0,25, 2); // One Operand is zero
+          DrivePort4.Sub(0,26, 3); // One Operand is zero
+          DrivePort4.Sub(0,28, 0); // One Operand is zero
           DrivePort4.Sub(0, 0, 1); // two Operands is zero
-          
+
           repeat(10)@(posedge GlobalPort.clk);
-          
+
           DrivePort4.Sub(50,50,2); // Two equal Operands in Sub
           DrivePort4.Sub(50,51,3); // Make Underflow by 1
           //--------------------------------------------------------------------------------------------//
@@ -974,9 +1152,25 @@ task testP4(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           DrivePort4.Add('hEFFFFFEF,'h10000011,0);
+          DrivePort4.Add('hEFFFFFEE,'h10000012,1);
+          DrivePort4.Add('hEFFFFFED,'h10000013,2);
+          DrivePort4.Add('hEFFFFFEC,'h10000014,3);
+          DrivePort4.Add('hEFFFFFEB,'h10000015,0);
           DrivePort4.Sub(0,1,1);
+          DrivePort4.Sub(1,2,2);
+          DrivePort4.Sub(2,3,3);
+          DrivePort4.Sub(3,4,0);
+          DrivePort4.Sub(4,5,1);
           DrivePort4.Add('hFFFFFFFF,3,2);
+          DrivePort4.Add('hFFFFFFFF,4,3);
+          DrivePort4.Add('hFFFFFFFF,5,0);
+          DrivePort4.Add('hFFFFFFFF,6,1);
+          DrivePort4.Add('hFFFFFFFF,7,2);
           DrivePort4.Sub('hFFFFFFFC,'hFFFFFFFE,3);
+          DrivePort4.Sub('hFFFFFFFb,'hFFFFFFFd,0);
+          DrivePort4.Sub('hFFFFFFFa,'hFFFFFFFc,1);
+          DrivePort4.Sub('hFFFFFFF9,'hFFFFFFFb,2);
+          DrivePort4.Sub('hFFFFFFF8,'hFFFFFFFa,3);
 
 
           $write("%dns :End of Checking Add/Sub in Port4.\n",$time);
@@ -987,16 +1181,30 @@ task testP4(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           $write("%dns :Start Checking Shift Commands in Port4.\n",$time);
 
           DrivePort4.SHL('1,'0,0);            // Make Zero Shift Left
-          DrivePort4.SHL(1,32,1);                    // Make 32 Shift Left
+          DrivePort4.SHL(56,'0,1);            // Make Zero Shift Left
+          DrivePort4.SHL(52,'0,2);            // Make Zero Shift Left
+          DrivePort4.SHL(456,'0,3);           // Make Zero Shift Left
+          DrivePort4.SHL(1225,'0,0);          // Make Zero Shift Left
+          DrivePort4.SHL(1,32,1);             // Make 32 Shift Left
+          DrivePort4.SHL(2,32,2);             // Make 32 Shift Left
+          DrivePort4.SHL(15,32,3);            // Make 32 Shift Left
+          DrivePort4.SHL(32,32,0);            // Make 32 Shift Left
+          DrivePort4.SHL(45,32,1);            // Make 32 Shift Left
           DrivePort4.SHR('1,'0,2);            // Make Zero Shift Right
-          DrivePort4.SHR('h10000000,32,3);         // Make 32 Shift Right
-          repeat(10)@(posedge GlobalPort.clk);
-          DrivePort4.SHL('he11d33e8,'h603a86c1,0);           // 1 bit overflow in left Shift
-          DrivePort4.SHL('h097ec66a,'h8b3fed4a,1);           // 6 bit overflow in left Shift
+          DrivePort4.SHR(45,'0,3);            // Make Zero Shift Right
+          DrivePort4.SHR(12,'0,0);            // Make Zero Shift Right
+          DrivePort4.SHR(14,'0,1);            // Make Zero Shift Right
+          DrivePort4.SHR(15,'0,2);            // Make Zero Shift Right
+          DrivePort4.SHR('h10000000,5'b1,3);  // Make 32 Shift Right
+          DrivePort4.SHR(535,5'b1,0);         // Make 32 Shift Right
+          DrivePort4.SHR(632,5'b1,1);         // Make 32 Shift Right
+          DrivePort4.SHR(425,5'b1,2);         // Make 32 Shift Right
+          DrivePort4.SHR(200,5'b1,3);         // Make 32 Shift Right
+          DrivePort4.SHL('he11d33e8,'h603a86c1,0);    // 1 bit overflow in left Shift
+          DrivePort4.SHL('h097ec66a,'h8b3fed4a,1);    // 6 bit overflow in left Shift
           DrivePort4.SHL('1,'1,2);
           DrivePort4.SHR('1,'1,3);
           repeat(10)@(posedge GlobalPort.clk);
-
           //--------------------! Check the shift command on the zero operand !---------//
 
           repeat(2)
@@ -1013,8 +1221,16 @@ task testP4(int testcase_number =4, int make_test=20); // Test Case scenarios fo
 
           DrivePort4.SHL('hFFFFFFF0,'hFFFFFFE2, 0);
           DrivePort4.SHL('hFFFFFFF0,'hFEFEFEE1, 1);
+          DrivePort4.SHL('hFFFFFFF0,'hFEFEFEE3, 2);
+          DrivePort4.SHL('hFFFFFFF0,'hFEFEFEE4, 3);
+          DrivePort4.SHL('hFFFFFFF0,'hFEFEFEE5, 0);
+          DrivePort4.SHL('hFFFFFFF0,'hFEFEFEE6, 1);
           DrivePort4.SHR('h0FFFFFFF,'hFFFFFFE2, 2);
           DrivePort4.SHR('h0FFFFFFF,'hFEFEFEE1, 3);
+          DrivePort4.SHR('h0FFFFFFF,'hFEFEFEE2, 0);
+          DrivePort4.SHR('h0FFFFFFF,'hFEFEFEE3, 1);
+          DrivePort4.SHR('h0FFFFFFF,'hFEFEFEE4, 2);
+          DrivePort4.SHR('h0FFFFFFF,'hFEFEFEE5, 3);
 
           repeat(10)@(posedge GlobalPort.clk);
 
@@ -1036,13 +1252,14 @@ task testP4(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           // -----------! Make 4 Add/Sub or Shift Commands with random order !--------------------//
-          repeat(10) begin
-          repeat(4)
+          repeat(10)
           begin
-            assert(RandP4.randomize());
-            RandP4.do_RandCase(50,100,0,50,50,50,0);
-          end
-          repeat(10)@(posedge GlobalPort.clk);
+            repeat(4)
+            begin
+              assert(RandP4.randomize());
+              RandP4.do_RandCase(50,100,0,50,50,50,0);
+            end
+            repeat(10)@(posedge GlobalPort.clk);
           end
           $write("%dns :End of Checking the sequence and prioritize the execution of commands in Port4.\n",$time);
         end
@@ -1087,32 +1304,21 @@ task testP4(int testcase_number =4, int make_test=20); // Test Case scenarios fo
         4:
         begin
           $write("%dns :Start sending %0d random valid command in Port4.\n",$time,make_test*4);
-          repeat(make_test) begin
-          repeat(4) begin
-          assert(RandP4.randomize());
-          RandP4.full_random_valid_command();
-          end
-          assert(RandP4.randomize());
-          repeat(RandP4.time_delay)@(posedge GlobalPort.clk);
+          repeat(make_test)
+          begin
+            repeat(4)
+            begin
+              assert(RandP4.randomize());
+              RandP4.full_random_valid_command();
+            end
+            assert(RandP4.randomize());
+            repeat(RandP4.time_delay)@(posedge GlobalPort.clk);
           end
           $write("%dns :End of sending %0d random valid command in Port4.\n",$time,make_test*4);
         end
 
         5:
         begin
-          $write("%dns :Start Send data at the same time as the reset is active in Port4.\n",$time);
-          GlobalPort.reset=1;
-
-          repeat(4)
-          begin
-            assert(RandP4.randomize());
-            RandP4.do_RandCase(45,50,50,45,50,50,10);
-          end
-          GlobalPort.reset = 0;
-          $write("%dns :End of Send data at the same time as the reset is active in Port4.\n",$time);
-        end
-
-        6:begin
           $write("%dns :Start Checking Send multiple commands from the same port with the same tags in Port4.\n",$time);
 
           //-------! Send multiple commands from the same port with the same tags !------//
@@ -1155,9 +1361,10 @@ task testP4(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           $write("%dns :End of Checking Send multiple commands from the same port with the same tags in Port4.\n",$time);
-        
+
         end
-        7:begin
+        6:
+        begin
           $write("%dns :Start Checking Submit multiple identical commands with different tags in Port4.\n",$time);
 
           repeat(4)
@@ -1168,32 +1375,40 @@ task testP4(int testcase_number =4, int make_test=20); // Test Case scenarios fo
           repeat(10)@(posedge GlobalPort.clk);
 
           $write("%dns :End Checking Submit multiple identical commands with different tags in Port4.\n",$time);
-        
+
         end
-        8:begin
-          repeat(3) begin
-          assert(RandP4.randomize());
-          RandP4.do_RandCase(100,50,50,0,0,0,0);
+        7:
+        begin
+          repeat(3)
+          begin
+            assert(RandP4.randomize());
+            RandP4.do_RandCase(100,50,50,0,0,0,0);
           end
           assert(RandP4.randomize());
           RandP4.do_RandCase(0,0,0,100,50,50,0);
         end
-        9:begin
-          repeat(4)begin
+        8:
+        begin
+          repeat(4)
+          begin
             assert(RandP4.randomize());
             RandP4.do_RandCase(100,50,50,0,0,0,0);
           end
         end
-        10:begin
-          repeat(3) begin
-          assert(RandP4.randomize());
-          RandP4.do_RandCase(0,0,0,100,50,50,0);
+        9:
+        begin
+          repeat(3)
+          begin
+            assert(RandP4.randomize());
+            RandP4.do_RandCase(0,0,0,100,50,50,0);
           end
           assert(RandP4.randomize());
           RandP4.do_RandCase(100,50,50,0,0,0,0);
         end
-        11:begin
-          repeat(4)begin
+        10:
+        begin
+          repeat(4)
+          begin
             assert(RandP4.randomize());
             RandP4.do_RandCase(0,0,0,100,50,50,0);
           end
@@ -1204,150 +1419,179 @@ task testP4(int testcase_number =4, int make_test=20); // Test Case scenarios fo
   endtask
 
 
-task Make_Shift_out_of_order_result (); // Make out of order Shift result in all ports
+  task Make_Shift_out_of_order_result (); // Make out of order Shift result in all ports
     IReset();
-        @(posedge GlobalPort.clk);
-        GlobalPort.reset = 0;
+    @(posedge GlobalPort.clk);
+    GlobalPort.reset = 0;
     $write("%dns : Make_Shift_out_of_order_result Test activated\n",$time);
     fork
-      testP1(8);
-      testP2(9);
-      testP3(9);
-      testP4(9);
-    join
-    repeat(10)@(posedge GlobalPort.clk);
-    
-    fork
-      testP1(9);
+      testP1(7);
       testP2(8);
-      testP3(9);
-      testP4(9);
-    join
-    repeat(10)@(posedge GlobalPort.clk);
-   
-    fork
-      testP1(9);
-      testP2(9);
       testP3(8);
-      testP4(9);
-    join
-    repeat(10)@(posedge GlobalPort.clk);
-   
-    fork
-      testP1(9);
-      testP2(9);
-      testP3(9);
       testP4(8);
     join
     repeat(10)@(posedge GlobalPort.clk);
 
+    fork
+      testP1(8);
+      testP2(7);
+      testP3(8);
+      testP4(8);
+    join
+    repeat(10)@(posedge GlobalPort.clk);
+
+    fork
+      testP1(8);
+      testP2(8);
+      testP3(7);
+      testP4(8);
+    join
+    repeat(10)@(posedge GlobalPort.clk);
+
+    fork
+      testP1(8);
+      testP2(8);
+      testP3(8);
+      testP4(7);
+    join
+    repeat(10)@(posedge GlobalPort.clk);
+
     $write("%dns : Make_Shift_out_of_order_result Test deactivated\n",$time);
-endtask
-task Make_AddSub_out_of_order_result (); // Make out of order AddSub result in all ports
-   IReset();
-        @(posedge GlobalPort.clk);
-        GlobalPort.reset = 0;
+  endtask
+  task Make_AddSub_out_of_order_result (); // Make out of order AddSub result in all ports
+    IReset();
+    @(posedge GlobalPort.clk);
+    GlobalPort.reset = 0;
     $write("%dns : Make_AddSub_out_of_order_result Test activated\n",$time);
     fork
-      testP1(10);
-      testP2(11);
-      testP3(11);
-      testP4(11);
-    join
-    repeat(10)@(posedge GlobalPort.clk);
-    
-    fork
-      testP1(11);
+      testP1(9);
       testP2(10);
-      testP3(11);
-      testP4(11);
-    join
-    repeat(10)@(posedge GlobalPort.clk);
-   
-    fork
-      testP1(11);
-      testP2(11);
       testP3(10);
-      testP4(11);
-    join
-    repeat(10)@(posedge GlobalPort.clk);
-   
-    fork
-      testP1(11);
-      testP2(11);
-      testP3(11);
       testP4(10);
     join
     repeat(10)@(posedge GlobalPort.clk);
 
-    $write("%dns : Make_AddSub_out_of_order_result Test deactivated\n",$time);
-endtask
-
-/*
-  task Separate_Test (); //Run different and random scenarios separately on ports
-    /* IReset();
-     @(posedge GlobalPort.clk);
-     GlobalPort.reset     = 0;*//*
-    $write("%dns : Seperate Test activated\n",$time);
-    assert(RandGlobal.randomize());
-    testP1(RandGlobal.Case_selector);
-
-    repeat(5)@(posedge GlobalPort.clk); // Maked Delay between Tests
-
-    assert(RandGlobal.randomize());
-    testP2(RandGlobal.Case_selector);
-    repeat(5)@(posedge GlobalPort.clk);
-
-    assert(RandGlobal.randomize());
-    testP3(RandGlobal.Case_selector);
-    repeat(5)@(posedge GlobalPort.clk);
-
-    assert(RandGlobal.randomize());
-    testP4(RandGlobal.Case_selector);
-
+    fork
+      testP1(10);
+      testP2(9);
+      testP3(10);
+      testP4(10);
+    join
     repeat(10)@(posedge GlobalPort.clk);
-    $write("%dns : Seperate Test deactivated\n",$time);
+
+    fork
+      testP1(10);
+      testP2(10);
+      testP3(9);
+      testP4(10);
+    join
+    repeat(10)@(posedge GlobalPort.clk);
+
+    fork
+      testP1(10);
+      testP2(10);
+      testP3(10);
+      testP4(9);
+    join
+    repeat(10)@(posedge GlobalPort.clk);
+
+    $write("%dns : Make_AddSub_out_of_order_result Test deactivated\n",$time);
   endtask
-*/
-/*
-  task Random_Test_Selector();
 
-    $write("%dns: Start Random Test Selector\n",$time);
-
-    repeat(1)
+  task SimultaneousStaticTest ();// SimultaneousStaticTest testing of all ports with a static scenarios
+    for(int state=0;state<10;state ++)
     begin
-      IReset();
-      @(posedge GlobalPort.clk);
-      GlobalPort.reset     = 0;
+      for(int case_sel=0;case_sel<4;case_sel++)
+      begin
+        IReset();
+        @(posedge GlobalPort.clk);
+        GlobalPort.reset     = 0;
+        $write("%dns : SimultaneousStaticTest activated\n",$time);
 
-      assert(RandGlobal.randomize());
-      case(RandGlobal.test_selector)
-
-        1:
-          testP1(RandGlobal.Case_selector);
-        2:
-          testP2(RandGlobal.Case_selector);
-        3:
-          testP3(RandGlobal.Case_selector);
-        4:
-          testP4(RandGlobal.Case_selector);
-        5:
-          Simultaneous_Test();
-        6:
-          Make_out_of_order_result ();
-
-        default:
-          Separate_Test();
-
-      endcase
-
+        case(state)
+          default:
+          begin
+            fork
+              testP1(case_sel);
+              testP2(case_sel);
+            join
+          end
+          1:
+          begin
+            fork
+              testP1(case_sel);
+              testP3(case_sel);
+            join
+          end
+          2:
+          begin
+            fork
+              testP1(case_sel);
+              testP4(case_sel);
+            join
+          end
+          3:
+          begin
+            fork
+              testP2(case_sel);
+              testP3(case_sel);
+            join
+          end
+          4:
+          begin
+            fork
+              testP2(case_sel);
+              testP4(case_sel);
+            join
+          end
+          5:
+          begin
+            fork
+              testP1(case_sel);
+              testP2(case_sel);
+              testP3(case_sel);
+            join
+          end
+          6:
+          begin
+            fork
+              testP1(case_sel);
+              testP2(case_sel);
+              testP4(case_sel);
+            join
+          end
+          7:
+          begin
+            fork
+              testP1(case_sel);
+              testP4(case_sel);
+              testP3(case_sel);
+            join
+          end
+          8:
+          begin
+            fork
+              testP4(case_sel);
+              testP2(case_sel);
+              testP3(case_sel);
+            join
+          end
+          9:
+          begin
+            fork
+              testP1(case_sel);
+              testP2(case_sel);
+              testP3(case_sel);
+              testP4(case_sel);
+            join
+          end
+        endcase
+        repeat(10)@(posedge GlobalPort.clk);
+      end
     end
-    $write("%dns: End Random Test Selector\n",$time);
-    repeat(20)@(posedge GlobalPort.clk);
-    -> Finish;
+    $write("%dns : SimultaneousStaticTest deactivated\n",$time);
 
   endtask
-  */
 
 
 endclass //Generator

@@ -68,6 +68,12 @@ class Checker;
             $fwrite(FILE_ID,"::%0dns:C-%0d: !Fault! {  Stray Response  }\n",$time,data_received_counter);
           if(duv_result[35:34]!=0)
             $fwrite(FILE_ID,"::%0dns:C-%0d: !Fault! {  Stray Tag  }\n",$time,data_received_counter);
+          //synopsys translate_off
+          //coverage off
+          if(duv_result[31:0]!=0)
+            $fwrite(FILE_ID,"::%0dns:C-%0d: !Fault! {  Stray Result  }\n",$time,data_received_counter);
+          //coverage on
+          //synopsys translate_on
         end
       end
       @(negedge GlobalPort.clk);

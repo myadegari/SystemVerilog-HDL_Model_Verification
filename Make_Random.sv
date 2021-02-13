@@ -106,6 +106,8 @@ class make_random;
         begin
             bit [69:0] stimuli_packet;
             Tag=tag_maker;
+          //synopsys translate_off
+          //coverage off
             randcase
                 AddSub_Chance:begin
                                     randcase
@@ -183,6 +185,9 @@ class make_random;
                                 SPort.req_data_in = 0;
                             end
             endcase
+            //coverage on
+          //synopsys translate_on
+
     end
     endtask
 
