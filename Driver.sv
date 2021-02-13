@@ -25,6 +25,9 @@ class Driver;
 
   task Add(int Data1,int Data2, int Tag);
     begin
+      bit [69:0] stimuli_packet;
+      stimuli_packet={Tag,4'b0001,Data1,Data2};
+      SPort.stimuli_out=stimuli_packet;
       SPort.req_cmd_in = 4'b0001;
       SPort.req_data_in = Data1;
       SPort.req_tag_in = Tag;
@@ -40,6 +43,9 @@ class Driver;
 
   task Sub(int Data1,int Data2, int Tag);
     begin
+      bit [69:0] stimuli_packet;
+      stimuli_packet={Tag,4'b0010,Data1,Data2};
+      SPort.stimuli_out=stimuli_packet;
       SPort.req_cmd_in = 4'b0010;
       SPort.req_data_in = Data1;
       SPort.req_tag_in = Tag;
@@ -54,6 +60,9 @@ class Driver;
 
   task SHL (int Data, int Shift_number, int Tag);
     begin
+      bit [69:0] stimuli_packet;
+      stimuli_packet={Tag,4'b0101,Data,Shift_number};
+      SPort.stimuli_out=stimuli_packet;
       SPort.req_cmd_in = 4'b0101;
       SPort.req_data_in = Data;
       SPort.req_tag_in = Tag;
@@ -68,6 +77,9 @@ class Driver;
 
   task SHR (int Data, int Shift_number, int Tag);
     begin
+      bit [69:0] stimuli_packet;
+      stimuli_packet={Tag,4'b0110,Data,Shift_number};
+      SPort.stimuli_out=stimuli_packet;
       SPort.req_cmd_in = 4'b0110;
       SPort.req_data_in = Data;
       SPort.req_tag_in = Tag;

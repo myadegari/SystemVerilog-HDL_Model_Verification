@@ -1,2 +1,5 @@
 vsim.wlf
 work/
+*.txt
+Golden_Modelv2.sv
+covhtmlreport/
